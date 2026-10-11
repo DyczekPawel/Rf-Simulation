@@ -1,0 +1,168 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 31,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "common-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    },
+    {
+      "name": "win-base",
+      "hidden": true,
+      "inherits": "common-base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-mingw-static",
+        "VCPKG_HOST_TRIPLET": "x64-mingw-static"
+      }
+    },
+    {
+      "name": "wsl-base",
+      "hidden": true,
+      "inherits": "common-base",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
+        "VCPKG_HOST_TRIPLET": "x64-linux"
+      },
+      "vendor": {
+        "jetbrains.com/clion": {
+          "toolchain": "WSL"
+        }
+      }
+    },
+    {
+      "name": "debug-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "win-debug",
+      "displayName": "Windows - Debug",
+      "inherits": [
+        "win-base",
+        "debug-base"
+      ]
+    },
+    {
+      "name": "win-release",
+      "displayName": "Windows - Release",
+      "inherits": "win-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RF_SIM_BUILD_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "win-coverage",
+      "displayName": "Windows - Coverage",
+      "inherits": [
+        "win-base",
+        "debug-base"
+      ],
+      "cacheVariables": {
+        "RF_SIM_ENABLE_COVERAGE": "ON"
+      }
+    },
+    {
+      "name": "wsl-asan",
+      "displayName": "WSL - ASan + UBSan",
+      "inherits": [
+        "wsl-base",
+        "debug-base"
+      ],
+      "cacheVariables": {
+        "RF_SIM_ENABLE_ASAN": "ON"
+      }
+    },
+    {
+      "name": "wsl-tsan",
+      "displayName": "WSL - TSan",
+      "inherits": [
+        "wsl-base",
+        "debug-base"
+      ],
+      "cacheVariables": {
+        "RF_SIM_ENABLE_TSAN": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "win-debug",
+      "configurePreset": "win-debug"
+    },
+    {
+      "name": "win-release",
+      "configurePreset": "win-release"
+    },
+    {
+      "name": "win-coverage",
+      "configurePreset": "win-coverage"
+    },
+    {
+      "name": "wsl-asan",
+      "configurePreset": "wsl-asan"
+    },
+    {
+      "name": "wsl-tsan",
+      "configurePreset": "wsl-tsan"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "win-debug",
+      "inherits": "test-base",
+      "configurePreset": "win-debug"
+    },
+    {
+      "name": "win-coverage",
+      "inherits": "test-base",
+      "configurePreset": "win-coverage"
+    },
+    {
+      "name": "wsl-asan",
+      "inherits": "test-base",
+      "configurePreset": "wsl-asan",
+      "environment": {
+        "ASAN_OPTIONS": "detect_leaks=1:abort_on_error=1",
+        "UBSAN_OPTIONS": "print_stacktrace=1:halt_on_error=1"
+      }
+    },
+    {
+      "name": "wsl-tsan",
+      "inherits": "test-base",
+      "configurePreset": "wsl-tsan",
+      "environment": {
+        "TSAN_OPTIONS": "halt_on_error=1:second_deadlock_stack=1"
+      }
+    }
+  ]
+}
