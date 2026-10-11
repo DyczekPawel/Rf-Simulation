@@ -1,0 +1,27 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+Standard: Latest
+IndentWidth: 4
+ContinuationIndentWidth: 4
+ColumnLimit: 120
+AccessModifierOffset: -4
+NamespaceIndentation: All
+FixNamespaceComments: false
+PointerAlignment: Right
+ReferenceAlignment: Right
+SpaceBeforeRangeBasedForLoopColon: false
+AllowShortIfStatementsOnASingleLine: WithoutElse
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortBlocksOnASingleLine: Never
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: Never
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+AlignTrailingComments: true
+ReflowComments: IndentOnly
+SortIncludes: false
+IncludeBlocks: Regroup
+InsertNewlineAtEOF: true
+...
