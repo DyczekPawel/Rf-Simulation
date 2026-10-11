@@ -1,0 +1,14 @@
+rf_sim_add_library(io
+        SOURCES
+        src/materials_io.cpp
+        src/image_io.cpp
+        HEADERS
+        include/rf_sim/io/materials_io.hpp
+        include/rf_sim/io/image_io.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+        PRIVATE_DEPS
+        rf_sim::model_opencv
+        nlohmann_json::nlohmann_json
+        ${OpenCV_LIBS}
+)

@@ -1,0 +1,9 @@
+rf_sim_add_test_group(io
+        TESTS
+        materials_io_test
+        image_io_test
+        LIBS
+        rf_sim::io
+        rf_sim::model_opencv
+        ${OpenCV_LIBS}
+)
