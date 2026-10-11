@@ -6,3 +6,13 @@ rf_sim_add_library(model
         include/rf_sim/model/grid2d.hpp
         include/rf_sim/model/material.hpp
 )
+
+rf_sim_add_library(model_opencv
+        SOURCES
+        src/opencv.cpp
+        HEADERS
+        include/rf_sim/model/opencv.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+        opencv_core
+)

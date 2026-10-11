@@ -3,6 +3,8 @@ rf_sim_add_test_group(model
         grid2d_test
         material_tets
         floor_plan_test
+        opencv_test
         LIBS
         rf_sim::model
+        rf_sim::model_opencv
 )
