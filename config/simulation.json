@@ -1,0 +1,13 @@
+{
+  "input": "floor_plan.png",
+  "output": "./out/",
+  "pixels_per_meter": 100,
+  "solver": {
+    "type": "raytracing_cpu",
+    "params": {
+      "max_bounces": 3,
+      "min_power_dbm": -90,
+      "polarization": "TE"
+    }
+  }
+}
