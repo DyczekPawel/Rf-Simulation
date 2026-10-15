@@ -44,6 +44,26 @@ namespace RfSim::Model {
          */
         static FloorPlan fromImage(const RgbImage &image, Materials &&materials, double pixelsPerMeter);
 
+        [[nodiscard]] std::size_t width() const noexcept {
+            return m_materialGrid.width();
+        }
+
+        [[nodiscard]] std::size_t height() const noexcept {
+            return m_materialGrid.height();
+        }
+
+        [[nodiscard]] const Grid2D<MaterialId> &materialGrid() const noexcept {
+            return m_materialGrid;
+        }
+
+        [[nodiscard]] double pixelsPerMeter() const noexcept {
+            return m_pixelsPerMeter;
+        }
+
+        [[nodiscard]] const Materials &materials() const noexcept {
+            return m_materials;
+        }
+
     private:
         Grid2D<MaterialId> m_materialGrid; ///< material id of every pixel
         Materials m_materials;             ///< materials indexed by MaterialId
