@@ -1,0 +1,9 @@
+rf_sim_add_library(solver_api
+        SOURCES
+        src/solver.cpp
+        HEADERS
+        include/rf_sim/solver/api/solver.hpp
+        include/rf_sim/solver/api/solver_error.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+)
