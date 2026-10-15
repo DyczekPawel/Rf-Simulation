@@ -5,6 +5,7 @@ rf_sim_add_library(model
         include/rf_sim/model/floor_plan.hpp
         include/rf_sim/model/grid2d.hpp
         include/rf_sim/model/material.hpp
+        include/rf_sim/model/transmitter.hpp
 )
 
 rf_sim_add_library(model_opencv
