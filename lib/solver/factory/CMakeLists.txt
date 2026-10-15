@@ -1,0 +1,10 @@
+rf_sim_add_library(solver_factory
+        SOURCES
+        src/solver_factory.cpp
+        HEADERS
+        include/rf_sim/solver/solver_factory.hpp
+        PUBLIC_DEPS
+        rf_sim::solver_api
+        PRIVATE_DEPS
+        rf_sim::solver_raytracing
+)

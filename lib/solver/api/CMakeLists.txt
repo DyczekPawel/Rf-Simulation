@@ -4,6 +4,8 @@ rf_sim_add_library(solver_api
         HEADERS
         include/rf_sim/solver/api/solver.hpp
         include/rf_sim/solver/api/solver_error.hpp
+        include/rf_sim/solver/api/polarization.hpp
+        include/rf_sim/solver/api/raytracing_config.hpp
         PUBLIC_DEPS
         rf_sim::model
 )
