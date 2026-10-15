@@ -1,6 +1,7 @@
 #pragma once
 #include <span>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace RfSim::Model {
@@ -58,6 +59,13 @@ namespace RfSim::Model {
          */
         [[nodiscard]] size_t height() const noexcept {
             return m_height;
+        }
+
+        /**
+         * @return Shape of grid [width, height]
+         */
+        [[nodiscard]] std::array<size_t, 2> shape() const noexcept {
+            return {m_width, m_height};
         }
 
         /**
@@ -122,6 +130,13 @@ namespace RfSim::Model {
          */
         [[nodiscard]] bool contains(const size_t x, const size_t y) const noexcept {
             return x < m_width && y < m_height;
+        }
+
+        [[nodiscard]] bool contains(const std::pair<int, int> &coordinates) const noexcept {
+            return coordinates.first >= 0 &&
+                   coordinates.second >= 0 &&
+                   std::cmp_less(coordinates.first, m_width) &&
+                   std::cmp_less(coordinates.second, m_height);
         }
 
         /**
