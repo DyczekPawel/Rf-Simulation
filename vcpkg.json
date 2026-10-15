@@ -3,10 +3,6 @@
   "version-string": "0.0.1",
   "dependencies": [
     {
-      "name": "eigen3",
-      "version>=": "3.4.0#5"
-    },
-    {
       "name": "opencv4",
       "default-features": false,
       "features": [
