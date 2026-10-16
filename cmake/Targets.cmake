@@ -15,7 +15,7 @@ function(_rf_sim_finalize TARGET FOLDER)
         target_compile_features(${TARGET} INTERFACE cxx_std_26)
     else ()
         target_compile_features(${TARGET} PUBLIC cxx_std_26)
-        target_link_libraries(${TARGET} PRIVATE rf_sim::warnings rf_sim::build_utils)
+        target_link_libraries(${TARGET} PRIVATE rf_sim::warnings rf_sim_logging rf_sim::build_utils)
         rf_sim_enable_clang_tidy(${TARGET})
     endif ()
 

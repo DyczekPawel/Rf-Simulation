@@ -1,12 +1,14 @@
 #include "context.hpp"
+#include "logging_observer.hpp"
 
+#include <rf_sim/solver/api/composite_observer.hpp>
 #include <rf_sim/visualization/render.hpp>
 #include <rf_sim/core/simulation.hpp>
 #include <rf_sim/io/image_io.hpp>
 #include <rf_sim/io/materials_io.hpp>
 #include <rf_sim/io/transmitters_io.hpp>
 
-#include <format>
+#include <fmt/format.h>
 
 namespace RfSim::Core {
 
@@ -30,7 +32,7 @@ namespace RfSim::Core {
 
             for (size_t i = 0; i < result.signalMaps.size(); ++i) {
                 const auto image = renderSignalMap(result.scene.floorPlan(), result.signalMaps[i]);
-                Io::saveImage(outputDirectory / std::format("signal_tx{}.png", i), image);
+                Io::saveImage(outputDirectory / fmt::format("signal_tx{}.png", i), image);
             }
         };
 
@@ -39,15 +41,24 @@ namespace RfSim::Core {
 
     SimulationResult runSimulation(const SimulationConfig &config, Solver::SolverObserver &observer) {
         const auto run = [&] {
+            LoggingObserver logging;
+            Solver::CompositeObserver observers{logging, observer};
+
+            fmt::println("  - Loading scene");
             auto scene = loadScene(config);
+            fmt::println("  - Creating solver");
             const auto solver = Solver::createSolver(config.solver);
 
             const auto solve = [&] {
-                return solver->solve(scene, observer);
+                return solver->solve(scene, observers);
             };
+
+            fmt::println("\nRunning simulation...");
             auto signalMaps = Detail::withContext("solver '" + solver->name() + "'", solve);
 
             SimulationResult result{.scene = std::move(scene), .signalMaps = std::move(signalMaps)};
+
+            fmt::println("Writing results");
             writeResults(result, config.outputDirectory);
             return result;
         };

@@ -21,6 +21,7 @@ include(Dependencies)
 include(BuildUtils)
 include(ClangTidy)
 include(Warnings)
+include(Logging)
 include(Targets)
 
 add_subdirectory(lib)
