@@ -22,7 +22,7 @@ namespace RfSim::Io {
          * @return Parsed material.
          *
          * @throws std::runtime_error describing the first invalid or missing field.
- */
+         */
         Model::Material parseMaterial(const nlohmann::json &json) {
             auto errorOnConditionMet = [](const bool condition, const std::string &errorMessage) {
                 if (condition) throw std::runtime_error("parseMaterial: material " + errorMessage);
