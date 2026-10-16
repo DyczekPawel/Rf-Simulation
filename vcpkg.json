@@ -17,6 +17,10 @@
       "version>=": "3.12.0"
     },
     {
+      "name": "indicators",
+      "version>=": "2.3"
+    },
+    {
       "name": "spdlog",
       "version>=": "1.17.0#1"
     },
