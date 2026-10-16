@@ -15,7 +15,6 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(RF_SIM_LIBRARIES_TARGETS_FOLDER "rf_sim_libs" CACHE STRING "Folder where libraries targets are placed")
 set(RF_SIM_TESTS_TARGETS_FOLDER "rf_sim_tests" CACHE STRING "Folder where tests targets are placed")
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Dependencies)
 include(BuildUtils)
