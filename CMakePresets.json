@@ -54,6 +54,15 @@
       }
     },
     {
+      "name": "release-base",
+      "hidden": true,
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "RF_SIM_BUILD_TESTS": "OFF",
+        "RF_SIM_ENABLE_LTO": "ON"
+      }
+    },
+    {
       "name": "win-debug",
       "displayName": "Windows - Debug",
       "inherits": [
@@ -64,11 +73,22 @@
     {
       "name": "win-release",
       "displayName": "Windows - Release",
-      "inherits": "win-base",
+      "description": "AVX disabled on purpose: MinGW GCC does not align the stack for AVX spills (GCC PR54412).",
+      "inherits": [
+        "win-base",
+        "release-base"
+      ],
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "RF_SIM_BUILD_TESTS": "OFF"
+        "RF_SIM_ARCH": "x86-64-v2"
       }
+    },
+    {
+      "name": "wsl-release",
+      "displayName": "WSL - Release",
+      "inherits": [
+        "wsl-base",
+        "release-base"
+      ]
     },
     {
       "name": "win-coverage",
@@ -112,6 +132,10 @@
     {
       "name": "win-release",
       "configurePreset": "win-release"
+    },
+    {
+      "name": "wsl-release",
+      "configurePreset": "wsl-release"
     },
     {
       "name": "win-coverage",

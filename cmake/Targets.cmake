@@ -22,6 +22,17 @@ function(_rf_sim_finalize TARGET FOLDER)
     if (NOT FOLDER STREQUAL "")
         set_target_properties(${TARGET} PROPERTIES FOLDER "${FOLDER}")
     endif ()
+
+    get_target_property(type ${TARGET} TYPE)
+    if (NOT type STREQUAL "INTERFACE_LIBRARY")
+        target_compile_options(${TARGET} PRIVATE
+                $<$<CONFIG:Release>:-fno-math-errno>
+                $<$<BOOL:${RF_SIM_ARCH}>:-march=${RF_SIM_ARCH}>)
+
+        if (RF_SIM_ENABLE_LTO AND RF_SIM_IPO_SUPPORTED)
+            set_property(TARGET ${TARGET} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+        endif ()
+    endif ()
 endfunction()
 
 # Creates library target rf_sim_<name> with alias rf_sim::<name>.
