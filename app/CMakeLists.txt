@@ -1,7 +1,9 @@
 rf_sim_add_library(app
         SOURCES
+        src/logging_session.cpp
         src/cli_progress.cpp
         HEADERS
+        include/rf_sim/app/logging_session.hpp
         include/rf_sim/app/cli_progress.hpp
         PUBLIC_DEPS
         rf_sim::solver_api
