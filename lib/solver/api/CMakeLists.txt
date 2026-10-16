@@ -6,6 +6,7 @@ rf_sim_add_library(solver_api
         include/rf_sim/solver/api/solver_error.hpp
         include/rf_sim/solver/api/polarization.hpp
         include/rf_sim/solver/api/raytracing_config.hpp
+        include/rf_sim/solver/api/composite_observer.hpp
         PUBLIC_DEPS
         rf_sim::model
 )
