@@ -14,4 +14,14 @@ namespace RfSim::Io {
      * @throws std::runtime_error if the file cannot be read, is empty, cannot be decoded or converted.
      */
     Model::RgbImage loadImage(const std::filesystem::path &path);
+
+    /**
+     * @brief Saves an RgbImage to a file; the format is chosen from the path extension (e.g. ".png").
+     *
+     * @details The parent directory must already exist; creating it is the caller's decision.
+     *
+     * @throws std::runtime_error if the extension is missing or unsupported, encoding fails
+     *          or the file cannot be written.
+     */
+    void saveImage(const std::filesystem::path &path, const Model::RgbImage &image);
 }

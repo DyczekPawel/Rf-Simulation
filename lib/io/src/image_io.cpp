@@ -1,7 +1,11 @@
+#include "json_utils.hpp"
+
 #include <rf_sim/io/image_io.hpp>
 #include <rf_sim/model/opencv.hpp>
 
+#include <algorithm>
 #include <fstream>
+#include <iterator>
 
 #include <opencv2/opencv.hpp>
 
@@ -41,5 +45,34 @@ namespace RfSim::Io {
         }
 
         return image;
+    }
+
+    void saveImage(const std::filesystem::path &path, const Model::RgbImage &image) {
+        const auto save = [&] {
+            const auto extension = path.extension().string();
+            if (extension.empty()) throw std::runtime_error("path has no extension, cannot choose format");
+
+            // Encode in memory and write with std::ofstream, mirroring loadImage:
+            // cv::imwrite takes a narrow string path and breaks on non-ASCII paths on Windows.
+            const auto mat = Model::grid2cv(image);
+            std::vector<uchar> buffer;
+            try {
+                if (!cv::imencode(extension, mat, buffer)) throw std::runtime_error("encoding failed");
+            } catch (const cv::Exception &e) {
+                throw std::runtime_error("unsupported format '" + extension + "': " + e.what());
+            }
+
+            std::ofstream file(path, std::ios::binary);
+            if (!file) throw std::runtime_error("cannot open file for writing");
+
+            // Byte-wise copy through the stream buffer instead of ostream::write, which needs const char*
+            const auto result = std::ranges::copy(buffer, std::ostreambuf_iterator<char>(file));
+
+            // close() flushes the buffer, so write errors may only show up here
+            file.close();
+            if (result.out.failed() || !file) throw std::runtime_error("write failed");
+        };
+
+        Detail::withContext("saveImage: " + path.string(), save);
     }
 }
