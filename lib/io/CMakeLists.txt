@@ -1,5 +1,6 @@
 rf_sim_add_library(io
         SOURCES
+        src/json_utils.cpp
         src/materials_io.cpp
         src/image_io.cpp
         HEADERS
