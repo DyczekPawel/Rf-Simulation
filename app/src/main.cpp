@@ -5,8 +5,22 @@
 
 using namespace RfSim;
 
-class CliProgress : public Solver::SolverObserver {
-};
+namespace {
+    class CliProgress : public Solver::SolverObserver {
+    public:
+        void onTransmitterStart(size_t txIdx, size_t txTotal) override {
+
+        }
+
+        void onProgress(const Solver::ProgressEvent &event) override {
+
+        }
+
+        void onTransmitterFinish(size_t txIdx, std::span<const Solver::Metric> metrics) override {
+
+        }
+    };
+}
 
 int main(const int argc, char *const*argv) {
     if (argc != 2) {

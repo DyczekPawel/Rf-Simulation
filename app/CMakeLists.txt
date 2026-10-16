@@ -1,6 +1,6 @@
 rf_sim_add_executable(rf_sim
         SOURCES
-        main.cpp
+        src/main.cpp
         DEPS
         rf_sim::core
 )
