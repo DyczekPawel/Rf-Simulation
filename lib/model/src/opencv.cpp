@@ -1,8 +1,11 @@
 #include <rf_sim/model/opencv.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <stdexcept>
 
 cv::Mat RfSim::Model::grid2cv(const RgbImage &img) {
+    RF_SIM_PROFILE_FUNCTION();
+
     if (img.empty()) throw std::invalid_argument("grid2cv: empty image");
 
     cv::Mat mat(static_cast<int>(img.height()), static_cast<int>(img.width()), CV_8UC3);
@@ -19,6 +22,8 @@ cv::Mat RfSim::Model::grid2cv(const RgbImage &img) {
 }
 
 RfSim::Model::RgbImage RfSim::Model::cv2grid(const cv::Mat &mat) {
+    RF_SIM_PROFILE_FUNCTION();
+
     if (mat.empty()) throw std::invalid_argument("cv2grid: empty cv image");
     if (mat.type() != CV_8UC3) throw std::invalid_argument("cv2grid: expected CV_8UC3");
 

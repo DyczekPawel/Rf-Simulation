@@ -1,5 +1,7 @@
 #include "logging_observer.hpp"
 
+#include <rf_sim/profiling.hpp>
+
 #include <iterator>
 
 #include <spdlog/spdlog.h>
@@ -31,6 +33,8 @@ namespace RfSim::Core {
             return;
         }
         m_nextDecile = decile + 1;
+
+        RF_SIM_PROFILE_SCOPE("Log progress");
         SPDLOG_DEBUG("Progress {}/{} ({}%){}", event.done, event.total, decile * 10, formatMetrics(event.metrics));
     }
 

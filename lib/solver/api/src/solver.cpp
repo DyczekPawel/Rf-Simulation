@@ -1,8 +1,11 @@
 #include <rf_sim/solver/api/solver.hpp>
 #include <rf_sim/solver/api/solver_error.hpp>
+#include <rf_sim/profiling.hpp>
 
 namespace RfSim::Solver {
     std::vector<Model::SignalMap> ISolver::solve(const Model::Scene &scene, SolverObserver &observer) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto &fp = scene.floorPlan();
         const auto results = doSolve(scene, observer);
 

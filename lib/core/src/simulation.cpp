@@ -7,12 +7,15 @@
 #include <rf_sim/io/image_io.hpp>
 #include <rf_sim/io/materials_io.hpp>
 #include <rf_sim/io/transmitters_io.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <fmt/format.h>
 
 namespace RfSim::Core {
 
     Model::Scene loadScene(const SimulationConfig &config) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto load = [&] {
             auto materials = Io::loadMaterials(config.materials);
             const auto image = Io::loadImage(config.floorPlan);
@@ -27,6 +30,8 @@ namespace RfSim::Core {
     }
 
     void writeResults(const SimulationResult &result, const std::filesystem::path &outputDirectory) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto write = [&] {
             std::filesystem::create_directories(outputDirectory);
 
@@ -40,12 +45,17 @@ namespace RfSim::Core {
     }
 
     SimulationResult runSimulation(const SimulationConfig &config, Solver::SolverObserver &observer) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto run = [&] {
             LoggingObserver logging;
             Solver::CompositeObserver observers{logging, observer};
 
+            RF_SIM_PROFILE_MESSAGE("Loading scene");
             fmt::println("  - Loading scene");
             auto scene = loadScene(config);
+
+            RF_SIM_PROFILE_MESSAGE("Creating solver");
             fmt::println("  - Creating solver");
             const auto solver = Solver::createSolver(config.solver);
 
@@ -53,11 +63,13 @@ namespace RfSim::Core {
                 return solver->solve(scene, observers);
             };
 
+            RF_SIM_PROFILE_MESSAGE("Running simulation");
             fmt::println("\nRunning simulation...");
             auto signalMaps = Detail::withContext("solver '" + solver->name() + "'", solve);
 
             SimulationResult result{.scene = std::move(scene), .signalMaps = std::move(signalMaps)};
 
+            RF_SIM_PROFILE_MESSAGE("Writing results");
             fmt::println("Writing results");
             writeResults(result, config.outputDirectory);
             return result;

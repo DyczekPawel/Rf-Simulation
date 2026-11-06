@@ -1,4 +1,5 @@
 #include <rf_sim/model/floor_plan.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <stdexcept>
 #include <limits>
@@ -16,6 +17,8 @@ namespace RfSim::Model {
          * @throws std::runtime_error on empty material vector.
          */
         Grid2D<MaterialId> buildMaterialGrid(const RgbImage &image, const Materials &materials) {
+            RF_SIM_PROFILE_FUNCTION();
+
             if (materials.empty()) throw std::runtime_error("buildMaterialGrid: materials is empty");
 
             std::vector<uint8_t> materialIdGridFlattened;
@@ -47,6 +50,8 @@ namespace RfSim::Model {
         : m_materialGrid(std::move(materialGrid)),
           m_materials(std::move(materials)),
           m_pixelsPerMeter(pixelsPerMeter) {
+        RF_SIM_PROFILE_FUNCTION();
+
         if (m_materials.empty())
             throw std::invalid_argument("FloorPlan: Material list is empty");
         if (m_materials.size() > static_cast<std::size_t>(std::numeric_limits<MaterialId>::max()) + 1)
@@ -57,13 +62,18 @@ namespace RfSim::Model {
 
         if (m_materialGrid.empty())
             throw std::invalid_argument("FloorPlan: MaterialMap is empty");
-        for (const MaterialId id: m_materialGrid.values()) {
-            if (id >= m_materials.size())
-                throw std::invalid_argument("FloorPlan: material grid references unknown material id");
+        {
+            RF_SIM_PROFILE_SCOPE("Validate material grid");
+            for (const MaterialId id: m_materialGrid.values()) {
+                if (id >= m_materials.size())
+                    throw std::invalid_argument("FloorPlan: material grid references unknown material id");
+            }
         }
     }
 
     FloorPlan FloorPlan::fromImage(const RgbImage &image, Materials &&materials, double pixelsPerMeter) {
+        RF_SIM_PROFILE_FUNCTION();
+
         auto grid = buildMaterialGrid(image, materials);
         return {std::move(grid), std::move(materials), pixelsPerMeter};
     }

@@ -1,6 +1,8 @@
 #include <rf_sim/app/cli_progress.hpp>
 #include <rf_sim/app/logging_session.hpp>
 #include <rf_sim/core/simulation.hpp>
+#include <rf_sim/profiling.hpp>
+#include <rf_sim/profiling_opencv.hpp>
 
 #include <cstdlib>
 #include <iostream>
@@ -10,6 +12,9 @@
 using namespace RfSim;
 
 int main(const int argc, char *const*argv) {
+    RF_SIM_PROFILE_TRACK_OPENCV();
+    RF_SIM_PROFILE_THREAD_NAME("main");
+
     if (argc != 2) {
         std::cerr << "usage: rf_sim <scenario_dir>\n";
         return 2;
@@ -21,6 +26,8 @@ int main(const int argc, char *const*argv) {
     const auto startTime = std::chrono::steady_clock::now();
 
     try {
+        RF_SIM_PROFILE_SCOPE("Scenario");
+
         std::cout << "Initializing..." << '\n';
         SPDLOG_INFO("Scenario: {}", scenarioDir.string());
         const auto config = Core::loadConfig(argv[1]);

@@ -1,4 +1,5 @@
 #include <rf_sim/io/materials_io.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <fstream>
 
@@ -69,6 +70,8 @@ namespace RfSim::Io {
     }
 
     Model::Materials loadMaterials(const std::filesystem::path &path) {
+        RF_SIM_PROFILE_FUNCTION();
+
         nlohmann::json materialsConfig;
         std::ifstream file(path);
 

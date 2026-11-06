@@ -3,6 +3,7 @@
 #include "trace_stats.hpp"
 
 #include <rf_sim/solver/raytracing_cpu/raytracing_solver.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <algorithm>
 #include <complex>
@@ -25,6 +26,8 @@ namespace RfSim::Solver {
 
         std::vector<MaterialPhysics> preProcessMats(const Model::Materials &mats,
                                                     const double frequency) {
+            RF_SIM_PROFILE_FUNCTION();
+
             std::vector<MaterialPhysics> result;
             result.reserve(mats.size());
 
@@ -135,6 +138,8 @@ namespace RfSim::Solver {
                                           const size_t gridHeight,
                                           const double txCoordX,
                                           const double txCoordY) {
+            RF_SIM_PROFILE_FUNCTION();
+
             const int rayAmount = static_cast<int>(std::ceil(
                 std::numbers::pi * 2 * std::sqrt(std::pow(gridWidth, 2) + std::pow(gridHeight, 2))));
 
@@ -162,6 +167,8 @@ namespace RfSim::Solver {
 
     std::vector<Model::SignalMap> RaytracingSolver::doSolve(const Model::Scene &scene,
                                                             SolverObserver &observer) {
+        RF_SIM_PROFILE_FUNCTION();
+
         std::vector<Model::SignalMap> results;
         results.reserve(scene.transmitters().size());
 
@@ -169,6 +176,7 @@ namespace RfSim::Solver {
         const auto &txs = scene.transmitters();
 
         for (size_t txIdx = 0; txIdx < txs.size(); ++txIdx) {
+            RF_SIM_PROFILE_SCOPE("Transmitter");
             observer.onTransmitterStart(txIdx, txs.size());
 
             const auto context = TraceContext{
@@ -195,17 +203,29 @@ namespace RfSim::Solver {
             pending.reserve(context.maxBounces + 1);
 
             TraceStats stats;
-            for (size_t rayIdx = 0; rayIdx < initialRays.size(); ++rayIdx) {
-                pending.push_back(initialRays[rayIdx]);
-                while (!pending.empty()) {
-                    const Ray2D ray{pending.back()};
-                    pending.pop_back();
-                    traceRay(ray, context, signalMap.grid(), pending, stats);
-                    stats.maxPendingSize = std::max(stats.maxPendingSize, pending.size());
-                }
+            {
+                RF_SIM_PROFILE_SCOPE("Trace Rays");
+                for (size_t rayIdx = 0; rayIdx < initialRays.size(); ++rayIdx) {
+                    RF_SIM_PROFILE_SCOPE("Ray tree");
+                    const auto raysBefore = stats.raysTraced;
+                    const auto cellsBefore = stats.cellsVisited;
 
-                const auto m = stats.metrics();
-                observer.onProgress({.done = rayIdx + 1, .total = initialRays.size(), .metrics = m});
+                    pending.push_back(initialRays[rayIdx]);
+                    while (!pending.empty()) {
+                        const Ray2D ray{pending.back()};
+                        pending.pop_back();
+                        traceRay(ray, context, signalMap.grid(), pending, stats);
+                        stats.maxPendingSize = std::max(stats.maxPendingSize, pending.size());
+                    }
+                    RF_SIM_PROFILE_PLOT("rays per tree", stats.raysTraced - raysBefore);
+                    RF_SIM_PROFILE_PLOT("cells per tree", stats.cellsVisited - cellsBefore);
+
+                    {
+                        RF_SIM_PROFILE_SCOPE("Observers");
+                        const auto m = stats.metrics();
+                        observer.onProgress({.done = rayIdx + 1, .total = initialRays.size(), .metrics = m});
+                    }
+                }
             }
 
             const auto m = stats.metrics();

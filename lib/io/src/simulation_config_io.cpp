@@ -1,4 +1,5 @@
 #include <rf_sim/io/simulation_config_io.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include "json_utils.hpp"
 
@@ -70,6 +71,8 @@ namespace RfSim::Io {
     }
 
     SimulationFile loadSimulationFile(const std::filesystem::path &path) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto load = [&] {
             const auto json = Detail::readJsonFile(path);
             if (!json.is_object()) throw std::runtime_error("root must be an object");
@@ -96,6 +99,8 @@ namespace RfSim::Io {
     }
 
     Solver::RaytracingConfig loadRaytracingConfig(const std::filesystem::path &path) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto load = [&] {
             const auto json = Detail::readJsonFile(path);
             const auto &solver = Detail::requireObject(json, k_solver);

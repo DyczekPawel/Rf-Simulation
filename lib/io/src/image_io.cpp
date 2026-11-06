@@ -2,6 +2,7 @@
 
 #include <rf_sim/io/image_io.hpp>
 #include <rf_sim/model/opencv.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -17,6 +18,8 @@ namespace RfSim::Io {
          * @throws std::runtime_error if the file cannot be read or is empty.
          */
         std::vector<char> readFile(const std::filesystem::path &path) {
+            RF_SIM_PROFILE_FUNCTION();
+
             std::error_code ec;
             const auto size = std::filesystem::file_size(path, ec);
             if (ec) throw std::runtime_error("loadImage: cannot read " + path.string() + ": " + ec.message());
@@ -32,6 +35,8 @@ namespace RfSim::Io {
 
 
     Model::RgbImage loadImage(const std::filesystem::path &path) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto buffer = readFile(path);
         const auto mat = cv::imdecode(buffer, cv::IMREAD_COLOR);
 
@@ -48,6 +53,8 @@ namespace RfSim::Io {
     }
 
     void saveImage(const std::filesystem::path &path, const Model::RgbImage &image) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto save = [&] {
             const auto extension = path.extension().string();
             if (extension.empty()) throw std::runtime_error("path has no extension, cannot choose format");

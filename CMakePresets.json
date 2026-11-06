@@ -63,12 +63,59 @@
       }
     },
     {
+      "name": "profile-base",
+      "hidden": true,
+      "inherits": "release-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_FLAGS_RELWITHDEBINFO": "-O3 -g -DNDEBUG -fno-omit-frame-pointer",
+        "CMAKE_CXX_FLAGS_RELWITHDEBINFO": "-O3 -g -DNDEBUG -fno-omit-frame-pointer"
+      }
+    },
+    {
+      "name": "wsl-profile",
+      "displayName": "WSL - Profile (Release + debug info)",
+      "inherits": [
+        "wsl-base",
+        "profile-base"
+      ]
+    },
+    {
       "name": "win-debug",
       "displayName": "Windows - Debug",
       "inherits": [
         "win-base",
         "debug-base"
       ]
+    },
+    {
+      "name": "windows-tracy",
+      "displayName": "Windows UCRT64 GCC + Tracy",
+      "inherits": [
+        "profile-base",
+        "win-base"
+      ],
+      "cacheVariables": {
+        "RF_SIM_PROFILING": "ON"
+      }
+    },
+    {
+      "name": "windows-tracy-clang",
+      "displayName": "Windows UCRT64 clang + PDB + Tracy",
+      "inherits": [
+        "profile-base",
+        "win-base"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS": "-gcodeview",
+        "CMAKE_CXX_FLAGS": "-gcodeview",
+        "CMAKE_EXE_LINKER_FLAGS": "-fuse-ld=lld -Wl,--pdb=",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fuse-ld=lld -Wl,--pdb=",
+        "RF_SIM_PROFILING": "ON",
+        "RF_SIM_PROFILING_ALLOC_CALLSTACK_DEPTH": "16"
+      }
     },
     {
       "name": "win-release",
@@ -148,6 +195,18 @@
     {
       "name": "wsl-tsan",
       "configurePreset": "wsl-tsan"
+    },
+    {
+      "name": "wsl-profile",
+      "configurePreset": "wsl-profile"
+    },
+    {
+      "name": "windows-tracy",
+      "configurePreset": "windows-tracy"
+    },
+    {
+      "name": "windows-tracy-clang",
+      "configurePreset": "windows-tracy-clang"
     }
   ],
   "testPresets": [

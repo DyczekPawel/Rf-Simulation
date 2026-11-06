@@ -1,4 +1,5 @@
 #include <rf_sim/io/transmitters_io.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include "json_utils.hpp"
 
@@ -58,6 +59,8 @@ namespace RfSim::Io {
     }
 
     std::vector<Model::Transmitter> loadTransmitters(const std::filesystem::path &path) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto load = [&] {
             const auto json = Detail::readJsonFile(path);
             if (!json.is_array()) throw std::runtime_error("root must be an array");

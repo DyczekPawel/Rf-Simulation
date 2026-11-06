@@ -1,4 +1,5 @@
 #include <rf_sim/visualization/render.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <algorithm>
 #include <array>
@@ -52,6 +53,8 @@ namespace RfSim::Core {
     }
 
     Model::RgbImage renderSignalMap(const Model::FloorPlan &floorPlan, const Model::SignalMap &signalMap) {
+        RF_SIM_PROFILE_FUNCTION();
+
         const auto width = floorPlan.width();
         const auto height = floorPlan.height();
         if (signalMap.width() != width || signalMap.height() != height)
@@ -68,22 +71,28 @@ namespace RfSim::Core {
         // Scale range from the cells that will actually be colored
         double minDbm = std::numeric_limits<double>::infinity();
         double maxDbm = -std::numeric_limits<double>::infinity();
-        for (size_t y = 0; y < height; ++y) {
-            for (size_t x = 0; x < width; ++x) {
-                if (!isColored(x, y)) continue;
-                minDbm = std::min(minDbm, signal[x, y]);
-                maxDbm = std::max(maxDbm, signal[x, y]);
+        {
+            RF_SIM_PROFILE_SCOPE("Signal range");
+            for (size_t y = 0; y < height; ++y) {
+                for (size_t x = 0; x < width; ++x) {
+                    if (!isColored(x, y)) continue;
+                    minDbm = std::min(minDbm, signal[x, y]);
+                    maxDbm = std::max(maxDbm, signal[x, y]);
+                }
             }
         }
         const double range = maxDbm - minDbm; // <= 0 (or NaN) when nothing / one value was reached
 
         Model::RgbImage image{width, height, Model::Rgb{}};
-        for (size_t y = 0; y < height; ++y) {
-            for (size_t x = 0; x < width; ++x) {
-                if (isColored(x, y)) {
-                    image[x, y] = colorAt(range > 0.0 ? (signal[x, y] - minDbm) / range : 1.0);
-                } else {
-                    image[x, y] = materials.at(materialGrid[x, y]).rgb;
+        {
+            RF_SIM_PROFILE_SCOPE("Colorize");
+            for (size_t y = 0; y < height; ++y) {
+                for (size_t x = 0; x < width; ++x) {
+                    if (isColored(x, y)) {
+                        image[x, y] = colorAt(range > 0.0 ? (signal[x, y] - minDbm) / range : 1.0);
+                    } else {
+                        image[x, y] = materials.at(materialGrid[x, y]).rgb;
+                    }
                 }
             }
         }

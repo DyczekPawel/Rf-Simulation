@@ -15,7 +15,7 @@ function(_rf_sim_finalize TARGET FOLDER)
         target_compile_features(${TARGET} INTERFACE cxx_std_26)
     else ()
         target_compile_features(${TARGET} PUBLIC cxx_std_26)
-        target_link_libraries(${TARGET} PRIVATE rf_sim::warnings rf_sim_logging rf_sim::build_utils)
+        target_link_libraries(${TARGET} PRIVATE rf_sim::warnings rf_sim_logging rf_sim_profiling rf_sim::build_utils)
         rf_sim_enable_clang_tidy(${TARGET})
     endif ()
 
@@ -26,11 +26,12 @@ function(_rf_sim_finalize TARGET FOLDER)
     get_target_property(type ${TARGET} TYPE)
     if (NOT type STREQUAL "INTERFACE_LIBRARY")
         target_compile_options(${TARGET} PRIVATE
-                $<$<CONFIG:Release>:-fno-math-errno>
+                $<$<CONFIG:Release,RelWithDebInfo>:-fno-math-errno>
                 $<$<BOOL:${RF_SIM_ARCH}>:-march=${RF_SIM_ARCH}>)
 
         if (RF_SIM_ENABLE_LTO AND RF_SIM_IPO_SUPPORTED)
             set_property(TARGET ${TARGET} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+            set_property(TARGET ${TARGET} PROPERTY INTERPROCEDURAL_OPTIMIZATION_RELWITHDEBINFO ON)
         endif ()
     endif ()
 endfunction()

@@ -1,4 +1,5 @@
 #include <rf_sim/app/logging_session.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <spdlog/async.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -27,7 +28,11 @@ namespace RfSim::App {
     }
 
     LoggingSession::LoggingSession(const std::filesystem::path &logFile) {
-        spdlog::init_thread_pool(k_queueSize, 1);
+        spdlog::init_thread_pool(k_queueSize,
+                                 1,
+                                 [] {
+                                     RF_SIM_PROFILE_THREAD_NAME("spdlog");
+                                 });
 
         std::vector sinks{makeConsoleSink()};
         try {

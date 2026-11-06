@@ -1,4 +1,5 @@
 #include <rf_sim/app/cli_progress.hpp>
+#include <rf_sim/profiling.hpp>
 
 #include <iostream>
 
@@ -45,6 +46,8 @@ namespace RfSim::App {
         }
         m_lastPercent = percent;
         m_lastRedraw = now;
+
+        RF_SIM_PROFILE_SCOPE("CliProgress redraw");
         m_bar->set_progress(percent);
     }
 
