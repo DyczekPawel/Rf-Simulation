@@ -15,28 +15,28 @@ namespace RfSim::Io {
         constexpr std::string_view k_y = "y";
 
         struct Properties {
-            double frequencyHz;
-            double powerDbm;
+            float frequencyHz;
+            float powerDbm;
         };
 
         struct Position {
-            double x;
-            double y;
+            float x;
+            float y;
         };
 
         Properties parseProperties(const nlohmann::json &json) {
             Detail::rejectUnknownKeys(json, {k_frequency, k_powerDbm});
 
-            const auto frequency = Detail::require<double>(json, k_frequency);
-            if (!(frequency > 0.0))
+            const auto frequency = Detail::require<float>(json, k_frequency);
+            if (!(frequency > 0.0F))
                 throw std::runtime_error("'" + std::string(k_frequency) + "' must be positive");
 
-            return {.frequencyHz = frequency, .powerDbm = Detail::require<double>(json, k_powerDbm)};
+            return {.frequencyHz = frequency, .powerDbm = Detail::require<float>(json, k_powerDbm)};
         }
 
         Position parsePosition(const nlohmann::json &json) {
             Detail::rejectUnknownKeys(json, {k_x, k_y});
-            return {.x = Detail::require<double>(json, k_x), .y = Detail::require<double>(json, k_y)};
+            return {.x = Detail::require<float>(json, k_x), .y = Detail::require<float>(json, k_y)};
         }
 
         Model::Transmitter parseTransmitter(const nlohmann::json &json) {

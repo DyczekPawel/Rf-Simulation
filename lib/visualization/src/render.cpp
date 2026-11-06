@@ -14,7 +14,7 @@ namespace RfSim::Core {
         constexpr Model::MaterialId k_backgroundMaterial = 0;
 
         struct ColorStop {
-            double position;
+            float position;
             Model::Rgb color;
         };
 
@@ -27,16 +27,16 @@ namespace RfSim::Core {
             ColorStop{.position = 1.00, .color = {.r = 180, .g = 20, .b = 10}},
         };
 
-        std::uint8_t lerpChannel(const std::uint8_t a, const std::uint8_t b, const double t) {
-            const double value = std::lerp(static_cast<double>(a), static_cast<double>(b), t);
+        std::uint8_t lerpChannel(const std::uint8_t a, const std::uint8_t b, const float t) {
+            const float value = std::lerp(static_cast<float>(a), static_cast<float>(b), t);
             return static_cast<std::uint8_t>(std::clamp(std::lround(value), 0L, 255L));
         }
 
         /**
          * @param t position on the scale, clamped to [0, 1]
          */
-        Model::Rgb colorAt(double t) {
-            t = std::clamp(t, 0.0, 1.0);
+        Model::Rgb colorAt(float t) {
+            t = std::clamp(t, 0.0F, 1.0F);
             const auto *const upper = std::ranges::find_if(k_colorScale,
                                                            [t](const ColorStop &s) {
                                                                return s.position >= t;
@@ -45,7 +45,7 @@ namespace RfSim::Core {
 
             const auto &hi = *upper;
             const auto &lo = *std::prev(upper);
-            const double local = (t - lo.position) / (hi.position - lo.position);
+            const float local = (t - lo.position) / (hi.position - lo.position);
             return {.r = lerpChannel(lo.color.r, hi.color.r, local),
                     .g = lerpChannel(lo.color.g, hi.color.g, local),
                     .b = lerpChannel(lo.color.b, hi.color.b, local),};
@@ -64,13 +64,13 @@ namespace RfSim::Core {
         const auto &materials = floorPlan.materials();
         const auto &signal = signalMap.grid();
 
-        auto isColored = [&](const size_t x, const size_t y) {
+        auto const isColored = [&](const size_t x, const size_t y) {
             return materialGrid[x, y] == k_backgroundMaterial && std::isfinite(signal[x, y]);
         };
 
         // Scale range from the cells that will actually be colored
-        double minDbm = std::numeric_limits<double>::infinity();
-        double maxDbm = -std::numeric_limits<double>::infinity();
+        auto minDbm = std::numeric_limits<float>::infinity();
+        auto maxDbm = -std::numeric_limits<float>::infinity();
         {
             RF_SIM_PROFILE_SCOPE("Signal range");
             for (size_t y = 0; y < height; ++y) {
@@ -81,7 +81,7 @@ namespace RfSim::Core {
                 }
             }
         }
-        const double range = maxDbm - minDbm; // <= 0 (or NaN) when nothing / one value was reached
+        const float range = maxDbm - minDbm; // <= 0 (or NaN) when nothing / one value was reached
 
         Model::RgbImage image{width, height, Model::Rgb{}};
         {
@@ -89,7 +89,7 @@ namespace RfSim::Core {
             for (size_t y = 0; y < height; ++y) {
                 for (size_t x = 0; x < width; ++x) {
                     if (isColored(x, y)) {
-                        image[x, y] = colorAt(range > 0.0 ? (signal[x, y] - minDbm) / range : 1.0);
+                        image[x, y] = colorAt(range > 0.0F ? (signal[x, y] - minDbm) / range : 1.0F);
                     } else {
                         image[x, y] = materials.at(materialGrid[x, y]).rgb;
                     }

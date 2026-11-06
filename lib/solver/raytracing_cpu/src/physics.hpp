@@ -5,36 +5,36 @@
 #include <complex>
 
 namespace RfSim::Solver {
-    inline constexpr double k_speedOfLight = 299'792'458.0;
-    inline constexpr double k_neperToDb = 20.0 / std::numbers::ln10;
+    inline constexpr float k_speedOfLight = 299'792'458.0F;
+    inline constexpr float k_neperToDb = 20.0F / static_cast<float>(std::numbers::ln10);
 
     struct MaterialPhysics {
-        std::complex<double> eta;
-        double attenuationDbPerM;
+        std::complex<float> eta;
+        float attenuationDbPerM;
 
-        MaterialPhysics(const double epsilonR, const double sigma, const double frequency) {
-            const double frequencyGhz = frequency * 1e-9;
-            eta = {epsilonR, -17.98 * sigma / frequencyGhz};
+        MaterialPhysics(const float epsilonR, const float sigma, const float frequency) {
+            const float frequencyGhz = frequency * 1e-9F;
+            eta = {epsilonR, -17.98F * sigma / frequencyGhz};
 
-            const double k0 = 2 * std::numbers::pi * frequency / k_speedOfLight;
+            const float k0 = 2.0F * static_cast<float>(std::numbers::pi) * frequency / k_speedOfLight;
             attenuationDbPerM = k_neperToDb * k0 * std::abs(std::sqrt(eta).imag());
         };
     };
 
-    inline double reflectance(std::complex<double> eta1,
-                              std::complex<double> eta2,
-                              const double cosTheta,
-                              const Polarization pol) noexcept {
+    inline float reflectance(std::complex<float> eta1,
+                             std::complex<float> eta2,
+                             const float cosTheta,
+                             const Polarization pol) noexcept {
 
         if (eta1.real() > eta2.real()) {
             std::swap(eta1, eta2);
         }
 
-        const double sin2 = std::max(0.0, 1.0 - (cosTheta * cosTheta));
+        const float sin2 = std::max(0.0F, 1.0F - (cosTheta * cosTheta));
         const auto n1cos1 = std::sqrt(eta1) * cosTheta;
         const auto n2cos2 = std::sqrt(eta2 - eta1 * sin2);
 
-        std::complex<double> gamma;
+        std::complex<float> gamma;
         switch (pol) {
         case Polarization::TE:
             gamma = n1cos1 - n2cos2 / n1cos1 + n2cos2;
@@ -44,16 +44,16 @@ namespace RfSim::Solver {
             break;
         }
 
-        return std::clamp(std::norm(gamma), 0.0, 1.0);
+        return std::clamp(std::norm(gamma), 0.0F, 1.0F);
     }
 
-    inline double fractionToLossDb(const double fraction) noexcept {
-        constexpr double k_minFraction = 1e-12;
-        return -10.0 * std::log10(std::max(fraction, k_minFraction));
+    inline float fractionToLossDb(const float fraction) noexcept {
+        constexpr float k_minFraction = 1e-12F;
+        return -10.0F * std::log10(std::max(fraction, k_minFraction));
     }
 
-    inline double fsplDb(const double distance, const double frequency) noexcept {
-        return 20.0 * std::log10(4.0 * std::numbers::pi * distance * frequency / k_speedOfLight);
+    inline float fsplDb(const float distance, const float frequency) noexcept {
+        return 20.0F * std::log10(4.0F * static_cast<float>(std::numbers::pi) * distance * frequency / k_speedOfLight);
     }
 
 }

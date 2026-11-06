@@ -11,7 +11,7 @@ namespace RfSim::Io {
      */
     struct InputConfig {
         std::filesystem::path floorPlan;
-        double pixelsPerMeter{0};
+        float pixelsPerMeter{0};
     };
 
     /**
