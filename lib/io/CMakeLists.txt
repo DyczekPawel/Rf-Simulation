@@ -1,0 +1,20 @@
+rf_sim_add_library(io
+        SOURCES
+        src/json_utils.cpp
+        src/materials_io.cpp
+        src/image_io.cpp
+        src/simulation_config_io.cpp
+        src/transmitters_io.cpp
+        HEADERS
+        include/rf_sim/io/materials_io.hpp
+        include/rf_sim/io/image_io.hpp
+        include/rf_sim/io/simulation_config_io.hpp
+        include/rf_sim/io/transmitters_io.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+        rf_sim::solver_api
+        PRIVATE_DEPS
+        rf_sim::model_opencv
+        nlohmann_json::nlohmann_json
+        ${OpenCV_LIBS}
+)

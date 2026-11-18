@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Transmitter 1",
+    "properties": {
+      "frequency": 2.4e9,
+      "dBm": 20
+    },
+    "position": {
+      "x": 0,
+      "y": 0
+    }
+  }
+]

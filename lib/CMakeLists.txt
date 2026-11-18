@@ -1,0 +1,6 @@
+add_subdirectory(model)
+add_subdirectory(io)
+add_subdirectory(solver)
+add_subdirectory(visualization)
+add_subdirectory(core)
+add_subdirectory(profiling)

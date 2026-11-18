@@ -1,0 +1,239 @@
+#include "ray.hpp"
+#include "physics.hpp"
+#include "trace_stats.hpp"
+
+#include <rf_sim/solver/raytracing_cpu/raytracing_solver.hpp>
+#include <rf_sim/profiling.hpp>
+
+#include <algorithm>
+#include <complex>
+#include <cmath>
+#include <numbers>
+
+namespace RfSim::Solver {
+    namespace {
+        struct TraceContext {
+            const Model::Grid2D<Model::MaterialId> &matGrid;
+            const std::vector<MaterialPhysics> &matPhys;
+            float pixelsPerMeter;
+            float txPowerDbm;
+            float frequency;
+            float wavelength;
+            float minPowerDbm;
+            unsigned maxBounces;
+            Polarization polarization;
+        };
+
+        std::vector<MaterialPhysics> preProcessMats(const Model::Materials &mats,
+                                                    const float frequency) {
+            RF_SIM_PROFILE_FUNCTION();
+
+            std::vector<MaterialPhysics> result;
+            result.reserve(mats.size());
+
+            for (const auto &mat: mats) {
+                const Model::MaterialEM matEM{mat.ituModel, frequency};
+                const MaterialPhysics matPhy{matEM.epsilonR, matEM.sigma, frequency};
+                result.push_back(matPhy);
+            }
+
+            return result;
+        }
+
+        void traceRay(Ray2D ray,
+                      const TraceContext &ctx,
+                      Model::Grid2D<float> &out,
+                      std::vector<Ray2D> &pending,
+                      TraceStats &stats) {
+            ++stats.raysTraced;
+            auto rt = RayTraversal2D(ray.origin, ray.direction, ray.startCell);
+
+            auto prevCell = ray.startCell;
+            auto currCell = rt.pos();
+            auto advanceAxis = Axis::Y; //default to Y axis same as RayTraversal2d::advance()
+
+            Model::MaterialId currMatId = ctx.matGrid[static_cast<size_t>(currCell.x), static_cast<size_t>(currCell.y)];
+            Model::MaterialId prevMatId = currMatId;
+
+            const size_t iterLimit = ctx.matGrid.height() + ctx.matGrid.width();
+            size_t iter = 0;
+            for (;;) {
+                if (!ctx.matGrid.contains(currCell)) {
+                    ++stats.endedOutOfGrid;
+                    return;
+                }
+                if (iter++ >= iterLimit) {
+                    ++stats.endedByIterLimit;
+                    return;
+                }
+                ++stats.cellsVisited;
+
+                const float tEntryM = rt.tEntry() / ctx.pixelsPerMeter;
+                const float tExitM = rt.tExit() / ctx.pixelsPerMeter;
+
+                currMatId = ctx.matGrid[static_cast<size_t>(currCell.x), static_cast<size_t>(currCell.y)];
+
+                if (prevMatId != currMatId) {
+                    const auto n = axisNormal(advanceAxis);
+                    const float cosTheta = std::abs(dot(ray.direction, n));
+                    const auto newRayDir = reflect(ray.direction, n);
+
+                    const float refl = reflectance(ctx.matPhys[prevMatId].eta,
+                                                   ctx.matPhys[currMatId].eta,
+                                                   cosTheta,
+                                                   ctx.polarization);
+                    const float newRayLossDb = ray.lossDb + fractionToLossDb(refl);
+
+                    if (ray.bounces >= ctx.maxBounces) {
+                        ++stats.reflectionsSkippedByBounces;
+                    } else {
+                        const float childDistM = ray.distanceOffset + tEntryM;
+                        const float childPowerDbm = ctx.txPowerDbm
+                                                    - fsplDb(std::max(childDistM, ctx.wavelength), ctx.frequency)
+                                                    - newRayLossDb;
+
+                        if (childPowerDbm < ctx.minPowerDbm) {
+                            ++stats.reflectionsSkippedByPower;
+                        } else {
+                            pending.push_back(Ray2D{
+                                .origin = ray.pointAt(rt.tEntry()),
+                                .direction = newRayDir,
+                                .startCell = prevCell,
+                                .distanceOffset = childDistM,
+                                .lossDb = newRayLossDb,
+                                .bounces = ray.bounces + 1,
+                            });
+                            ++stats.raysSpawned;
+                        }
+                    }
+
+                    ray.lossDb += fractionToLossDb(1.0F - refl);
+                }
+
+                const float halfMatLossDb = 0.5F * ctx.matPhys[currMatId].attenuationDbPerM * (tExitM - tEntryM);
+                ray.lossDb += halfMatLossDb;
+
+                const float distM = std::max(ray.distanceOffset + (0.5f * (tEntryM + tExitM)), ctx.wavelength);
+                const float powerDbm = ctx.txPowerDbm - fsplDb(distM, ctx.frequency) - ray.lossDb;
+
+                auto &cellPower = out[static_cast<size_t>(currCell.x), static_cast<size_t>(currCell.y)];
+                cellPower = std::max(cellPower, powerDbm);
+
+                ray.lossDb += halfMatLossDb;
+
+                if (powerDbm < ctx.minPowerDbm) {
+                    ++stats.endedByPower;
+                    return;
+                }
+
+                prevMatId = currMatId;
+
+                advanceAxis = rt.advance();
+                prevCell = currCell;
+                currCell = rt.pos();
+            }
+        }
+
+        std::vector<Ray2D> getInitialRays(const size_t gridWidth,
+                                          const size_t gridHeight,
+                                          const float txCoordX,
+                                          const float txCoordY) {
+            RF_SIM_PROFILE_FUNCTION();
+
+            const int rayAmount = static_cast<int>(std::ceil(
+                std::numbers::pi * 2 * std::sqrt(std::pow(gridWidth, 2) + std::pow(gridHeight, 2))));
+
+            std::vector<Ray2D> initialRays;
+            initialRays.reserve(static_cast<size_t>(rayAmount));
+
+            for (int i = 0; i < rayAmount; ++i) {
+                const float phi = 2.0F * static_cast<float>(std::numbers::pi) * static_cast<float>(i) / static_cast<
+                                      float>(rayAmount);
+                initialRays.push_back(Ray2D{
+                    .origin = {.x = txCoordX, .y = txCoordY},
+                    .direction = {.x = std::cos(phi), .y = std::sin(phi)},
+                    .startCell = {.x = static_cast<int>(std::floor(txCoordX)),
+                                  .y = static_cast<int>(std::floor(txCoordY)),},
+
+                });
+            }
+
+            return initialRays;
+        }
+    }
+
+    RaytracingSolver::RaytracingSolver(const RaytracingConfig &config) : m_config{config} {
+    }
+
+
+    std::vector<Model::SignalMap> RaytracingSolver::doSolve(const Model::Scene &scene,
+                                                            SolverObserver &observer) {
+        RF_SIM_PROFILE_FUNCTION();
+
+        std::vector<Model::SignalMap> results;
+        results.reserve(scene.transmitters().size());
+
+        const auto &fp = scene.floorPlan();
+        const auto &txs = scene.transmitters();
+
+        for (size_t txIdx = 0; txIdx < txs.size(); ++txIdx) {
+            RF_SIM_PROFILE_SCOPE("Transmitter");
+            observer.onTransmitterStart(txIdx, txs.size());
+
+            const auto context = TraceContext{
+                .matGrid = fp.materialGrid(),
+                .matPhys = preProcessMats(fp.materials(), txs[txIdx].frequencyHz()),
+                .pixelsPerMeter = fp.pixelsPerMeter(),
+                .txPowerDbm = txs[txIdx].powerDbm(),
+                .frequency = txs[txIdx].frequencyHz(),
+                .wavelength = k_speedOfLight / txs[txIdx].frequencyHz(),
+                .minPowerDbm = m_config.minPowerDbm,
+                .maxBounces = m_config.maxBounces,
+                .polarization = m_config.polarization,
+            };
+
+            const auto [txMetersX, txMetersY] = txs[txIdx].positionM();
+            const auto initialRays = getInitialRays(fp.width(),
+                                                    fp.height(),
+                                                    txMetersX * fp.pixelsPerMeter(),
+                                                    txMetersY * fp.pixelsPerMeter());
+
+            Model::SignalMap signalMap{fp.width(), fp.height(), fp.pixelsPerMeter()};
+
+            std::vector<Ray2D> pending;
+            pending.reserve(context.maxBounces + 1);
+
+            TraceStats stats;
+            {
+                RF_SIM_PROFILE_SCOPE("Trace Rays");
+                for (size_t rayIdx = 0; rayIdx < initialRays.size(); ++rayIdx) {
+                    RF_SIM_PROFILE_SCOPE("Ray tree");
+                    const auto raysBefore = stats.raysTraced;
+                    const auto cellsBefore = stats.cellsVisited;
+
+                    pending.push_back(initialRays[rayIdx]);
+                    while (!pending.empty()) {
+                        const Ray2D ray{pending.back()};
+                        pending.pop_back();
+                        traceRay(ray, context, signalMap.grid(), pending, stats);
+                        stats.maxPendingSize = std::max(stats.maxPendingSize, pending.size());
+                    }
+                    RF_SIM_PROFILE_PLOT("rays per tree", stats.raysTraced - raysBefore);
+                    RF_SIM_PROFILE_PLOT("cells per tree", stats.cellsVisited - cellsBefore);
+
+                    {
+                        RF_SIM_PROFILE_SCOPE("Observers");
+                        const auto m = stats.metrics();
+                        observer.onProgress({.done = rayIdx + 1, .total = initialRays.size(), .metrics = m});
+                    }
+                }
+            }
+
+            const auto m = stats.metrics();
+            observer.onTransmitterFinish(txIdx, m);
+            results.push_back(std::move(signalMap));
+        }
+
+        return results;
+    }
+}

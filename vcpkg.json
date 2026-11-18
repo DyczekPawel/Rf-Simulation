@@ -1,0 +1,40 @@
+{
+  "name": "rf-sim",
+  "version-string": "0.0.1",
+  "dependencies": [
+    {
+      "name": "opencv4",
+      "default-features": false,
+      "features": [
+        "png",
+        "fs",
+        "thread"
+      ],
+      "version>=": "4.11.0"
+    },
+    {
+      "name": "nlohmann-json",
+      "version>=": "3.12.0"
+    },
+    {
+      "name": "indicators",
+      "version>=": "2.3"
+    },
+    {
+      "name": "spdlog",
+      "version>=": "1.17.0#1"
+    },
+    {
+      "name": "fmt",
+      "version>=": "12.2.0#1"
+    }
+  ],
+  "features": {
+    "tests": {
+      "description": "Build Tests",
+      "dependencies": [
+        "gtest"
+      ]
+    }
+  }
+}

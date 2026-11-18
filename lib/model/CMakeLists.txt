@@ -1,0 +1,22 @@
+rf_sim_add_library(model
+        SOURCES
+        src/floor_plan.cpp
+        src/scene.cpp
+        HEADERS
+        include/rf_sim/model/floor_plan.hpp
+        include/rf_sim/model/grid2d.hpp
+        include/rf_sim/model/material.hpp
+        include/rf_sim/model/transmitter.hpp
+        include/rf_sim/model/scene.hpp
+        include/rf_sim/model/signal_map.hpp
+)
+
+rf_sim_add_library(model_opencv
+        SOURCES
+        src/opencv.cpp
+        HEADERS
+        include/rf_sim/model/opencv.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+        opencv_core
+)

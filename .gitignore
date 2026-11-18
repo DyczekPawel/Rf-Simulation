@@ -1,3 +1,7 @@
+# Workspace
+.idea
+CMakeUserPresets.json
+
 # Prerequisites
 *.d
 

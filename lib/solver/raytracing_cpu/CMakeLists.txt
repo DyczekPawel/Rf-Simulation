@@ -1,0 +1,12 @@
+rf_sim_add_library(solver_raytracing
+        SOURCES
+        src/raytracing_solver.cpp
+        HEADERS
+        include/rf_sim/solver/raytracing_cpu/raytracing_solver.hpp
+        PRIVATE_HEADERS
+        src/ray.hpp
+        src/physics.hpp
+        src/trace_stats.hpp
+        PUBLIC_DEPS
+        rf_sim::solver_api
+)

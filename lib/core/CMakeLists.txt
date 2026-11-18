@@ -1,0 +1,17 @@
+rf_sim_add_library(core
+        SOURCES
+        src/simulation_config.cpp
+        src/simulation.cpp
+        src/logging_observer.cpp
+        HEADERS
+        include/rf_sim/core/simulation_config.hpp
+        include/rf_sim/core/simulation.hpp
+        PUBLIC_DEPS
+        rf_sim::model
+        rf_sim::solver_api
+        rf_sim::solver_factory
+        PRIVATE_DEPS
+        rf_sim::io
+        rf_sim::visualization
+        fmt::fmt
+)
