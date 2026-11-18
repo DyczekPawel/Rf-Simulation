@@ -20,6 +20,7 @@ rf_sim_add_executable(rf_sim
         rf_sim::core
         fmt::fmt
 )
+target_compile_definitions(rf_sim PRIVATE RF_SIM_VERSION="${PROJECT_VERSION}")
 target_link_options(rf_sim PRIVATE -static)
 set_target_properties(rf_sim PROPERTIES OUTPUT_NAME rf-sim)
 rf_sim_enable_memory_profiling(rf_sim)

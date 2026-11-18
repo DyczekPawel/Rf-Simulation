@@ -20,6 +20,19 @@ int main(const int argc, char *const*argv) {
         return 2;
     }
 
+    if (argv[1] == std::string("--help") || argv[1] == std::string("-h")) {
+        std::cout << "usage: rf_sim <scenario_dir>\n";
+        std::cout << "available arguments\n";
+        std::cout << "\t--version, -v: shows version information\n";
+        std::cout << "\t--help, -h: shows help information\n";
+        return EXIT_SUCCESS;
+    }
+
+    if (argv[1] == std::string("--version") || argv[1] == std::string("-v")) {
+        std::cout << RF_SIM_VERSION << '\n';
+        return EXIT_SUCCESS;
+    }
+
     const std::filesystem::path scenarioDir{argv[1]};
     const App::LoggingSession logging(scenarioDir / "rf_sim.log");
 
