@@ -5,7 +5,11 @@ if (RF_SIM_BUILD_TESTS)
     list(APPEND VCPKG_MANIFEST_FEATURES "tests")
 endif ()
 
-project(rf_sim VERSION 0.1.0 DESCRIPTION "RF Simulation" LANGUAGES CXX)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg.json" _vcpkg_manifest)
+string(JSON _rf_sim_version GET "${_vcpkg_manifest}" "version")
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS vcpkg.json)
+
+project(rf_sim VERSION ${_rf_sim_version} DESCRIPTION "RF Simulation" LANGUAGES CXX)
 
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
