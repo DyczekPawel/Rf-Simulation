@@ -13,10 +13,10 @@ namespace RfSim::Model {
      * @note Relative permittivity is a * f^b and conductivity is c * f^d, with f in GHz.
      */
     struct ItuMaterialModel {
-        double a{}; ///< permittivity coefficient
-        double b{}; ///< permittivity frequency exponent
-        double c{}; ///< conductivity coefficient
-        double d{}; ///< conductivity frequency exponent
+        float a{}; ///< permittivity coefficient
+        float b{}; ///< permittivity frequency exponent
+        float c{}; ///< conductivity coefficient
+        float d{}; ///< conductivity frequency exponent
     };
 
     /**
@@ -37,8 +37,8 @@ namespace RfSim::Model {
      * @brief Stores solved permittivity and conductivity of material depending on frequency.
      */
     struct MaterialEM {
-        double epsilonR{}; ///< relative permittivity
-        double sigma{};    ///< conductivity in S/m
+        float epsilonR{}; ///< relative permittivity
+        float sigma{};    ///< conductivity in S/m
 
         MaterialEM() = default;
 
@@ -48,8 +48,8 @@ namespace RfSim::Model {
          * @param ituModel ITU model of material.
          * @param frequency wave frequency in Hz.
          */
-        MaterialEM(const ItuMaterialModel &ituModel, const double frequency) {
-            const double frequencyGhz = frequency * 1e-9;
+        MaterialEM(const ItuMaterialModel &ituModel, const float frequency) {
+            const float frequencyGhz = frequency * 1e-9F;
             epsilonR = ituModel.a * std::pow(frequencyGhz, ituModel.b);
             sigma = ituModel.c * std::pow(frequencyGhz, ituModel.d);
         }

@@ -15,17 +15,17 @@ namespace RfSim::Solver {
         struct TraceContext {
             const Model::Grid2D<Model::MaterialId> &matGrid;
             const std::vector<MaterialPhysics> &matPhys;
-            double pixelsPerMeter;
-            double txPowerDbm;
-            double frequency;
-            double wavelength;
-            double minPowerDbm;
+            float pixelsPerMeter;
+            float txPowerDbm;
+            float frequency;
+            float wavelength;
+            float minPowerDbm;
             unsigned maxBounces;
             Polarization polarization;
         };
 
         std::vector<MaterialPhysics> preProcessMats(const Model::Materials &mats,
-                                                    const double frequency) {
+                                                    const float frequency) {
             RF_SIM_PROFILE_FUNCTION();
 
             std::vector<MaterialPhysics> result;
@@ -42,7 +42,7 @@ namespace RfSim::Solver {
 
         void traceRay(Ray2D ray,
                       const TraceContext &ctx,
-                      Model::Grid2D<double> &out,
+                      Model::Grid2D<float> &out,
                       std::vector<Ray2D> &pending,
                       TraceStats &stats) {
             ++stats.raysTraced;
@@ -68,29 +68,29 @@ namespace RfSim::Solver {
                 }
                 ++stats.cellsVisited;
 
-                const double tEntryM = rt.tEntry() / ctx.pixelsPerMeter;
-                const double tExitM = rt.tExit() / ctx.pixelsPerMeter;
+                const float tEntryM = rt.tEntry() / ctx.pixelsPerMeter;
+                const float tExitM = rt.tExit() / ctx.pixelsPerMeter;
 
                 currMatId = ctx.matGrid[static_cast<size_t>(currCell.x), static_cast<size_t>(currCell.y)];
 
                 if (prevMatId != currMatId) {
                     const auto n = axisNormal(advanceAxis);
-                    const double cosTheta = std::abs(dot(ray.direction, n));
+                    const float cosTheta = std::abs(dot(ray.direction, n));
                     const auto newRayDir = reflect(ray.direction, n);
 
-                    const double refl = reflectance(ctx.matPhys[prevMatId].eta,
-                                                    ctx.matPhys[currMatId].eta,
-                                                    cosTheta,
-                                                    ctx.polarization);
-                    const double newRayLossDb = ray.lossDb + fractionToLossDb(refl);
+                    const float refl = reflectance(ctx.matPhys[prevMatId].eta,
+                                                   ctx.matPhys[currMatId].eta,
+                                                   cosTheta,
+                                                   ctx.polarization);
+                    const float newRayLossDb = ray.lossDb + fractionToLossDb(refl);
 
                     if (ray.bounces >= ctx.maxBounces) {
                         ++stats.reflectionsSkippedByBounces;
                     } else {
-                        const double childDistM = ray.distanceOffset + tEntryM;
-                        const double childPowerDbm = ctx.txPowerDbm
-                                                     - fsplDb(std::max(childDistM, ctx.wavelength), ctx.frequency)
-                                                     - newRayLossDb;
+                        const float childDistM = ray.distanceOffset + tEntryM;
+                        const float childPowerDbm = ctx.txPowerDbm
+                                                    - fsplDb(std::max(childDistM, ctx.wavelength), ctx.frequency)
+                                                    - newRayLossDb;
 
                         if (childPowerDbm < ctx.minPowerDbm) {
                             ++stats.reflectionsSkippedByPower;
@@ -107,14 +107,14 @@ namespace RfSim::Solver {
                         }
                     }
 
-                    ray.lossDb += fractionToLossDb(1.0 - refl);
+                    ray.lossDb += fractionToLossDb(1.0F - refl);
                 }
 
-                const double halfMatLossDb = 0.5 * ctx.matPhys[currMatId].attenuationDbPerM * (tExitM - tEntryM);
+                const float halfMatLossDb = 0.5F * ctx.matPhys[currMatId].attenuationDbPerM * (tExitM - tEntryM);
                 ray.lossDb += halfMatLossDb;
 
-                const double distM = std::max(ray.distanceOffset + (0.5 * (tEntryM + tExitM)), ctx.wavelength);
-                const double powerDbm = ctx.txPowerDbm - fsplDb(distM, ctx.frequency) - ray.lossDb;
+                const float distM = std::max(ray.distanceOffset + (0.5f * (tEntryM + tExitM)), ctx.wavelength);
+                const float powerDbm = ctx.txPowerDbm - fsplDb(distM, ctx.frequency) - ray.lossDb;
 
                 auto &cellPower = out[static_cast<size_t>(currCell.x), static_cast<size_t>(currCell.y)];
                 cellPower = std::max(cellPower, powerDbm);
@@ -136,8 +136,8 @@ namespace RfSim::Solver {
 
         std::vector<Ray2D> getInitialRays(const size_t gridWidth,
                                           const size_t gridHeight,
-                                          const double txCoordX,
-                                          const double txCoordY) {
+                                          const float txCoordX,
+                                          const float txCoordY) {
             RF_SIM_PROFILE_FUNCTION();
 
             const int rayAmount = static_cast<int>(std::ceil(
@@ -147,7 +147,8 @@ namespace RfSim::Solver {
             initialRays.reserve(static_cast<size_t>(rayAmount));
 
             for (int i = 0; i < rayAmount; ++i) {
-                const double phi = 2.0 * std::numbers::pi * i / rayAmount;
+                const float phi = 2.0F * static_cast<float>(std::numbers::pi) * static_cast<float>(i) / static_cast<
+                                      float>(rayAmount);
                 initialRays.push_back(Ray2D{
                     .origin = {.x = txCoordX, .y = txCoordY},
                     .direction = {.x = std::cos(phi), .y = std::sin(phi)},

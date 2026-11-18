@@ -4,7 +4,7 @@
 namespace RfSim::Solver {
     struct RaytracingConfig {
         unsigned maxBounces = 3;
-        double minPowerDbm = -90.0;
+        float minPowerDbm = -90.0;
         Polarization polarization = Polarization::TE;
     };
 }

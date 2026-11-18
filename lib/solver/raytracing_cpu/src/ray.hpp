@@ -97,7 +97,7 @@ namespace RfSim::Solver {
         return d - (T{2} * dot(d, n) * n);
     }
 
-    [[nodiscard]] constexpr Vec2D<double> axisNormal(const Axis axis) noexcept {
+    [[nodiscard]] constexpr Vec2D<float> axisNormal(const Axis axis) noexcept {
         switch (axis) {
         case Axis::X:
             return {.x = 1.0, .y = 0.0};
@@ -108,36 +108,36 @@ namespace RfSim::Solver {
     }
 
     struct Ray2D {
-        Vec2D<double> origin;
-        Vec2D<double> direction;
+        Vec2D<float> origin;
+        Vec2D<float> direction;
         Vec2D<int> startCell;
-        double distanceOffset{0};
-        double lossDb{0};
+        float distanceOffset{0};
+        float lossDb{0};
         unsigned int bounces{0};
 
-        [[nodiscard]] constexpr Vec2D<double> pointAt(const double t) const noexcept {
+        [[nodiscard]] constexpr Vec2D<float> pointAt(const float t) const noexcept {
             return origin + t * direction;
         }
     };
 
     class RayTraversal2D {
     public:
-        RayTraversal2D(const Vec2D<double> origin, const Vec2D<double> direction, const Vec2D<int> startCell) noexcept
+        RayTraversal2D(const Vec2D<float> origin, const Vec2D<float> direction, const Vec2D<int> startCell) noexcept
             : m_stepX{direction.x > 0 ? 1 : -1},
               m_stepY{direction.y > 0 ? 1 : -1},
               m_positionX(startCell.x),
               m_positionY(startCell.y),
               m_tMaxX(initialTMax(origin.x, m_positionX, m_stepX, direction.x)),
               m_tMaxY(initialTMax(origin.y, m_positionY, m_stepY, direction.y)),
-              m_tDeltaX(direction.x == 0 ? std::numeric_limits<double>::infinity() : std::abs(1 / direction.x)),
-              m_tDeltaY(direction.y == 0 ? std::numeric_limits<double>::infinity() : std::abs(1 / direction.y)),
+              m_tDeltaX(direction.x == 0 ? std::numeric_limits<float>::infinity() : std::abs(1 / direction.x)),
+              m_tDeltaY(direction.y == 0 ? std::numeric_limits<float>::infinity() : std::abs(1 / direction.y)),
               m_tExit(std::min(m_tMaxX, m_tMaxY)) {
             assert(std::abs(dot(direction, direction) - 1.0) < 1e-4 && "direction must be a unit vector");
 
-            assert(origin.x >= static_cast<double>(startCell.x) - 1e-4 &&
-                origin.x <= static_cast<double>(startCell.x + 1) + 1e-4 &&
-                origin.y >= static_cast<double>(startCell.y) - 1e-4 &&
-                origin.y <= static_cast<double>(startCell.y + 1) + 1e-4 &&
+            assert(origin.x >= static_cast<float>(startCell.x) - 1e-4 &&
+                origin.x <= static_cast<float>(startCell.x + 1) + 1e-4 &&
+                origin.y >= static_cast<float>(startCell.y) - 1e-4 &&
+                origin.y <= static_cast<float>(startCell.y + 1) + 1e-4 &&
                 "origin must lie within startCell");
         }
 
@@ -161,21 +161,21 @@ namespace RfSim::Solver {
             return axis;
         }
 
-        [[nodiscard]] double tExit() const noexcept {
+        [[nodiscard]] float tExit() const noexcept {
             return m_tExit;
         }
 
-        [[nodiscard]] double tEntry() const noexcept {
+        [[nodiscard]] float tEntry() const noexcept {
             return m_tEntry;
         }
 
     private:
-        static double initialTMax(const double origin,
-                                  const int cell,
-                                  const int step,
-                                  const double direction) noexcept {
-            if (direction == 0.0) return std::numeric_limits<double>::infinity();
-            return (static_cast<double>(cell) - origin + static_cast<double>(std::max(step, 0))) / direction;
+        static float initialTMax(const float origin,
+                                 const int cell,
+                                 const int step,
+                                 const float direction) noexcept {
+            if (direction == 0.0F) return std::numeric_limits<float>::infinity();
+            return (static_cast<float>(cell) - origin + static_cast<float>(std::max(step, 0))) / direction;
         }
 
         // Ray step
@@ -187,15 +187,15 @@ namespace RfSim::Solver {
         int m_positionY;
 
         // Ray tMax
-        double m_tMaxX;
-        double m_tMaxY;
+        float m_tMaxX;
+        float m_tMaxY;
 
         // Ray tDelta
-        double m_tDeltaX;
-        double m_tDeltaY;
+        float m_tDeltaX;
+        float m_tDeltaY;
 
         // Ray distances
-        double m_tExit;
-        double m_tEntry{0};
+        float m_tExit;
+        float m_tEntry{0};
     };
 }

@@ -15,7 +15,7 @@ namespace RfSim::Core {
         std::filesystem::path floorPlan;
         std::filesystem::path materials;
         std::filesystem::path transmitters;
-        double pixelsPerMeter{0};
+        float pixelsPerMeter{0};
 
         std::filesystem::path outputDirectory;
 

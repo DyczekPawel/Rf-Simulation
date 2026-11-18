@@ -26,7 +26,7 @@ namespace RfSim::Model {
          * @throws std::invalid_argument on empty material grid.
          * @throws std::invalid_argument if the grid references a material id outside \p materials.
          */
-        FloorPlan(Grid2D<MaterialId> &&materialGrid, Materials &&materials, double pixelsPerMeter);
+        FloorPlan(Grid2D<MaterialId> &&materialGrid, Materials &&materials, float pixelsPerMeter);
 
         /**
          * @brief Builds FloorPlan from a floor plan image by matching pixel colors to material colors.
@@ -42,7 +42,7 @@ namespace RfSim::Model {
          * @throws std::runtime_error on empty material vector.
          * @throws std::invalid_argument on any other condition rejected by the constructor.
          */
-        static FloorPlan fromImage(const RgbImage &image, Materials &&materials, double pixelsPerMeter);
+        static FloorPlan fromImage(const RgbImage &image, Materials &&materials, float pixelsPerMeter);
 
         [[nodiscard]] std::size_t width() const noexcept {
             return m_materialGrid.width();
@@ -56,7 +56,7 @@ namespace RfSim::Model {
             return m_materialGrid;
         }
 
-        [[nodiscard]] double pixelsPerMeter() const noexcept {
+        [[nodiscard]] float pixelsPerMeter() const noexcept {
             return m_pixelsPerMeter;
         }
 
@@ -67,6 +67,6 @@ namespace RfSim::Model {
     private:
         Grid2D<MaterialId> m_materialGrid; ///< material id of every pixel
         Materials m_materials;             ///< materials indexed by MaterialId
-        double m_pixelsPerMeter;           ///< scale of the floor plan
+        float m_pixelsPerMeter;            ///< scale of the floor plan
     };
 }

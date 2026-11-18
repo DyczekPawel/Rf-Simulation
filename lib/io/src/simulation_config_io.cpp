@@ -81,8 +81,8 @@ namespace RfSim::Io {
 
             SimulationFile file;
             file.input.floorPlan = requirePath(json, k_input);
-            file.input.pixelsPerMeter = Detail::require<double>(json, k_pixelsPerMeter);
-            if (!(file.input.pixelsPerMeter > 0.0))
+            file.input.pixelsPerMeter = Detail::require<float>(json, k_pixelsPerMeter);
+            if (!(file.input.pixelsPerMeter > 0.0F))
                 throw std::runtime_error("'" + std::string(k_pixelsPerMeter) + "' must be positive");
 
             file.output.directory = requirePath(json, k_output);

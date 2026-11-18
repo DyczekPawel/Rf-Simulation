@@ -46,7 +46,7 @@ namespace RfSim::Model {
 
     FloorPlan::FloorPlan(Grid2D<MaterialId> &&materialGrid,
                          Materials &&materials,
-                         const double pixelsPerMeter)
+                         const float pixelsPerMeter)
         : m_materialGrid(std::move(materialGrid)),
           m_materials(std::move(materials)),
           m_pixelsPerMeter(pixelsPerMeter) {
@@ -71,7 +71,7 @@ namespace RfSim::Model {
         }
     }
 
-    FloorPlan FloorPlan::fromImage(const RgbImage &image, Materials &&materials, double pixelsPerMeter) {
+    FloorPlan FloorPlan::fromImage(const RgbImage &image, Materials &&materials, float pixelsPerMeter) {
         RF_SIM_PROFILE_FUNCTION();
 
         auto grid = buildMaterialGrid(image, materials);

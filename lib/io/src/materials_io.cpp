@@ -61,10 +61,10 @@ namespace RfSim::Io {
             material.rgb = {.r = json.at(k_rgb).at(0).get<uint8_t>(),
                             .g = json.at(k_rgb).at(1).get<uint8_t>(),
                             .b = json.at(k_rgb).at(2).get<uint8_t>(),};
-            material.ituModel = {.a = json.at(k_itu).at(k_ituKeys.at(0)).get<double>(),
-                                 .b = json.at(k_itu).at(k_ituKeys.at(1)).get<double>(),
-                                 .c = json.at(k_itu).at(k_ituKeys.at(2)).get<double>(),
-                                 .d = json.at(k_itu).at(k_ituKeys.at(3)).get<double>(),};
+            material.ituModel = {.a = json.at(k_itu).at(k_ituKeys.at(0)).get<float>(),
+                                 .b = json.at(k_itu).at(k_ituKeys.at(1)).get<float>(),
+                                 .c = json.at(k_itu).at(k_ituKeys.at(2)).get<float>(),
+                                 .d = json.at(k_itu).at(k_ituKeys.at(3)).get<float>(),};
             return material;
         }
     }

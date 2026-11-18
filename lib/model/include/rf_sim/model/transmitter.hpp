@@ -4,13 +4,13 @@
 
 namespace RfSim::Model {
     struct Point2D {
-        double x{0}; //[m]
-        double y{0}; //[m]
+        float x{0}; //[m]
+        float y{0}; //[m]
     };
 
     class Transmitter {
     public:
-        Transmitter(std::string name, const Point2D position, const double frequencyHz, const double powerDbm)
+        Transmitter(std::string name, const Point2D position, const float frequencyHz, const float powerDbm)
             : m_name(std::move(name)),
               m_position(position),
               m_frequencyHz(frequencyHz),
@@ -25,18 +25,18 @@ namespace RfSim::Model {
             return m_position;
         }
 
-        [[nodiscard]] double frequencyHz() const noexcept {
+        [[nodiscard]] float frequencyHz() const noexcept {
             return m_frequencyHz;
         }
 
-        [[nodiscard]] double powerDbm() const noexcept {
+        [[nodiscard]] float powerDbm() const noexcept {
             return m_powerDbm;
         }
 
     private:
         std::string m_name;
         Point2D m_position;
-        double m_frequencyHz;
-        double m_powerDbm;
+        float m_frequencyHz;
+        float m_powerDbm;
     };
 }
