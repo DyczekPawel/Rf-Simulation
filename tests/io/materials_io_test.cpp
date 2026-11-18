@@ -34,10 +34,10 @@ namespace {
         const auto &[name, rgb, ituModel] = materials.at(1);
         EXPECT_EQ(name, "concrete");
         EXPECT_EQ(rgb, (Rgb{.r = 10, .g = 20, .b = 30}));
-        EXPECT_DOUBLE_EQ(ituModel.a, 5.24);
-        EXPECT_DOUBLE_EQ(ituModel.b, 0.0);
-        EXPECT_DOUBLE_EQ(ituModel.c, 0.0462);
-        EXPECT_DOUBLE_EQ(ituModel.d, 0.7822);
+        EXPECT_FLOAT_EQ(ituModel.a, 5.24F);
+        EXPECT_FLOAT_EQ(ituModel.b, 0.0F);
+        EXPECT_FLOAT_EQ(ituModel.c, 0.0462F);
+        EXPECT_FLOAT_EQ(ituModel.d, 0.7822F);
     }
 
     TEST_F(LoadMaterialsTest, ThrowsWhenFileDoesNotExist) {
